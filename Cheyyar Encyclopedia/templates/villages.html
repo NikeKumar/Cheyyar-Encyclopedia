@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+
+{% block body %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><br><br>
+    
+    {{ plotly_js }}
+</head>
+<body>
+    <div>
+        <h1 align="center"><b>Villages in Cheyyar</b></h1>
+        {{ plotly_fig|safe }}
+    </div>
+    
+</body>
+</html>
+
+{% endblock %}
