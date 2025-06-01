@@ -1,0 +1,197 @@
+{% extends 'layout.html' %}
+
+
+{% block body %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bus Timings</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
+    type="text/css"
+  />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <script src="https://kit.fontawesome.com/ab2155e76b.js" crossorigin="anonymous"></script>
+    
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+<style>
+body
+{
+    background-image: linear-gradient(to top, #f3e7e9 0%, #5695f3d2 99%, #2679f5dc 100%);
+    font-family:verdana;
+}
+.darken-grey-text {
+    color: #2E2E2E;
+}
+.input-group.md-form.form-sm.form-2 input {
+    border: 1px solid #bdbdbd;
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+}
+.input-group.md-form.form-sm.form-2 input.purple-border {
+    border: 1px solid #9e9e9e;
+}
+.input-group.md-form.form-sm.form-2 input[type=text]:focus:not([readonly]).purple-border {
+    border: 3px solid #ba68c8;
+    box-shadow: none;
+}
+#map {
+      height: 750px;
+      width: 100vw;
+    }
+</style>
+<script src="{{ url_for('static', filename='js/busmain.js') }}"></script>
+</head>
+<body><br><br>
+    <h1 class="text-center darken-grey-text mb-4">Bus Route</h1>
+    <br>
+    <div id='map'></div>
+    <br><br>
+    <h1 class="text-center darken-grey-text mb-4">Bus Timings</h1>
+    <div class="row">
+        
+        <div class="col-md-12">
+            
+            <div >
+                
+                
+                <form action="/bus_timings" method="get">
+                    <div  >
+                    <label for="filter" >Filter by Destination:</label>
+                    <input class="form-control my-0 py-1 pl-3 purple-border" type="text" id="searchInput" 
+                    placeholder="Search for your Destination..." aria-label="Search" >
+                
+                </div>
+                </form>
+            </div>
+        </div>
+        
+        
+    </div>
+    
+    <br><br>
+    <table id="myTable" style="width:70%;margin-left: 100px;">
+        <thead>
+            <tr>
+                <th>Route</th>
+                <th>Source</th>
+                <th>Source Time</th>
+                <th>Destination</th>
+                <th>Destination Time</th>
+                <th>Class</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for timing in bus_timings %}
+            <tr>
+                <td>{{ timing[0] }}</td>
+                <td>{{ timing[1] }}</td>
+                <td>{{ timing[2] }}</td>
+                <td>{{ timing[3] }}</td>
+                <td>{{timing[4]}}</td>
+                <td>{{timing[5]}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+   <!-- jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Bootstrap CSS -->
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+<!--custom style and script-->
+<link href="{{ url_for('static', filename='css/busstyle.css') }}" rel='stylesheet' type='text/css' />
+
+
+
+<!-- Google Maps API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWC_BTgDZhBZDNVUU8G_3eASyliD-6n1c&libraries=places"></script>
+
+<!-- Bootstrap JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script>
+        // Get references to the input field and table
+        var input = document.getElementById("searchInput");
+        var table = document.getElementById("myTable");
+
+        // Add an event listener to the input field for the "input" event
+        input.addEventListener("input", function () {
+            // Get the search term from the input field
+            var searchTerm = input.value.toLowerCase();
+
+            // Get all table rows
+            var rows = table.getElementsByTagName("tr");
+
+            // Loop through all rows, except the first one (header)
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                var cells = row.getElementsByTagName("td");
+                var shouldShow = false;
+
+                // Loop through all cells in the row
+                for (var j = 0; j < cells.length; j++) {
+                    var cell = cells[j];
+                    if (cell) {
+                        var cellText = cell.textContent.toLowerCase();
+                        // Check if the cell text contains the search term
+                        if (cellText.indexOf(searchTerm) > -1) {
+                            shouldShow = true;
+                            break; // No need to check other cells in the same row
+                        }
+                    }
+                }
+
+                // Show or hide the row based on the search result
+                if (shouldShow) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        });
+
+        var busTypeRadios = document.querySelectorAll('input[name="busType"]');
+
+        // Add event listeners to radio buttons
+        busTypeRadios.forEach(function (radio) {
+            radio.addEventListener("change", function () {
+                var selectedType = document.querySelector('input[name="busType"]:checked').value;
+
+                // Loop through all rows in the table
+                var rows = myTable.getElementsByTagName("tr");
+                for (var i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+                    var row = rows[i];
+                    var typeCell = row.getElementsByTagName("td")[1];
+
+                    // Show or hide rows based on the selected bus type
+                    if (typeCell.textContent === selectedType) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        });
+    </script>
+<br><br><br><br><br>
+</body>
+</html>
+
+
+
+{% endblock %}
